@@ -59,3 +59,9 @@ You can create your own filter lists which must be placed in the folder ```filte
 + make code nice
 + download all episodes of a podcast from the RSS feed
 + Extend the standard filter lists
+
+----------------------------------------------------------------
+
+## why?
+
+I created the program to analyze the german podcast Hobbylos by Rezo and Julian Bam on the frequency of the use of swear words. Hence the selection of the filter lists.
