@@ -1,96 +1,141 @@
-import whisper
+import os
+import shutil
 import string
 import time
-import os
+from threading import Thread
+
+import whisper
+
+from .TransscripePodcast import TransscripePodcast as tsp
+from .StopWatch import Stopwatch
 
 
 class Analyse():
+    """
+        class that contains methods to analyze a podcast for the occurrence of selected words
+    """
 
-    def __init__(self, options={}):
+    def __init__(self, options: dict ={}):
 
-        self.trancripe = True
-        self.transscript_path = "transscripte"
-        self.audio_path = "podcast"
-        self.whisper_model = "medium"
+        #standard options
+        self.transscripe: bool = True
+        self.transscript_path: str = "transscripte"
+        self.audio_path: str = "podcast"
+        self.whisper_model: str = "medium"
+        self.delete_files: dict = {"audio" : False, "transscripts" : False}
 
-        self.trancripe = options.get('trancripe', self.trancripe)
+        #get options from user if set
+        self.transscripe = options.get('transscripe', self.transscripe)
         self.transscript_path = options.get('transscript_path', self.transscript_path)
         self.audio_path = options.get('audio_path', self.audio_path)
         self.whisper_model = options.get('whisper_model',self.whisper_model)
-
-        self.filterlists = os.listdir("filterlists")
-
-        self.woerter_in_folge = []
-        self.unique_words_count = []
-        self.woerter_liste = []
-        self.all_episodes = os.listdir(self.audio_path)
-
-    def transcripe_all_epsisodes_of_podcast(self):
-        if self.trancripe:
-            print("\nstart transcription")
+        self.delete_files["audio"] = options.get('delete_audio_files',self.delete_files.get("audio"))
+        self.delete_files["transscripts"] = options.get('delete_transscript_files',self.delete_files.get("transscripts"))
 
 
-            model = whisper.load_model("tiny")
+        self.filterlists: list = os.listdir("filterlists")
 
-            if (not os.path.exists(self.transscript_path)):
-                os.mkdir(self.transscript_path)
+        self.word_in_epsiode: list = []
+        self.unique_words_count: list = []
+        self.word_list: list = []
 
-            for i, episode in enumerate(self.all_episodes):
-                i+= 1
+    def transcripe_all_epsisodes_of_podcast(self) -> None:
+        """
+            calls the transscription module
+        """
+        if self.transscripe:
 
-                current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-                print(f"\n\ntranscribe folge {i}.wav\nTime: {current_time}\n")
+            options = {
+                "transscript_path" : self.transscript_path,
+                "audio_path" : self.audio_path,
+                "whisper_model" : self.whisper_model
+            }
+            
+            transscripe = tsp(options)
+            transscripe.transscripe()
 
-                result = model.transcribe(f"{self.audio_path}/{i}.wav")
-
-                with open(f"{self.transscript_path}/Episode{i}test.txt", 'w') as f:
-                    f.writelines(result["text"].lower())
-
-            print("transcribe finished")
+            print("\ntranscribe finished")
         else:
             print("skipped transcribing")
 
 
     
-    def extrahiere_woerter(self, dateiname='AlleEpisoden.txt'):
-        for episode_no in range(1,10):
-            with open(f"transscripte/Episode{episode_no}.txt", "r") as f:
+    def convert_file_to_list(self) -> None:
+        """
+            converts the files with the transcripts into a list.
+            removes all special characters and spaces. 
+            all words are converted to lower case. 
+        """
+        print("start reading files")
+        for episode in os.listdir(self.transscript_path):
+            with open(f"transscripte/{episode}", "r") as f:
                 text = f.read()
                 text = text.replace(",", "").replace(".", "").replace("!", "").replace("?", "")
-                woerter_liste_tmp = text.split()
-                for word in woerter_liste_tmp:
-                    self.woerter_liste.append(word)
-        
+                word_list_tmp = text.split()
+                for word in word_list_tmp:
+                    self.word_list.append(word.strip())
+        print("read all files")
 
 
 
-    def filter_for_words(self):
+    def filter_for_words(self) -> None:
+        """
+            checks which words from the filter lists were used in the podcast
+        """
+        stopwatch = Stopwatch()
+        timer = Thread(target=stopwatch.printTime)
+        timer.start()
+
+        print("start filter")
         for filterlist in self.filterlists:
             with open(f"filterlists/{filterlist}", 'r') as file:
                 zeilen = file.readlines()
-                for wort in self.woerter_liste:
+                for wort in self.word_list:
                     for zeile in zeilen:
-                        if zeile.strip()  == wort.strip():
-                            self.woerter_in_folge.append(wort.lower().strip())
+                        if zeile.strip().lower()  == wort:
+                            self.word_in_epsiode.append(wort)
+        print("\nfiltered all")
 
+        stopwatch.stop()
 
-
-    def create_unique_word_list(self):
-        unique_words = set(self.woerter_in_folge)
-        self.unique_words_list = list(unique_words)
-
+    def create_unique_word_list(self) -> None:
+        """
+            delete all duplicates from the list of used words
+        """
+        print("start create_unique_word_list")
+        unique_words_set = set(self.word_in_epsiode)
+        self.unique_words_list = list(unique_words_set)
+        print("create_unique_word_list")
     
-    def count_occurance_of_words(self):
+    def count_occurance_of_words(self) -> None:
+        """
+            counts how often the found words from the filter lists were used in the podcast
+        """
+        print("start counting unique words")
         for wort in self.unique_words_list:
-            count = self.woerter_liste.count(wort.strip())
+            count = self.word_list.count(wort.strip())
             self.unique_words_count.append((wort.strip(), count))
-        
-    def analyze(self):
+        print("counted all\n\n")
+
+    def delete_project_files(self) -> None:
+        try:
+            if self.delete_files["audio"]:
+                shutil.rmtree(self.audio_path)
+            if self.delete_files["transscripts"]:
+                shutil.rmtree(self.transscript_path)
+        except FileNotFoundError:
+            pass
+
+    def analyze(self) -> None:
+        """
+            starts the process of analyzing the podcast and if selected transscripe it first
+        """
         self.transcripe_all_epsisodes_of_podcast()
-        self.extrahiere_woerter()
+        self.convert_file_to_list()
         self.filter_for_words()
         self.create_unique_word_list()
         self.count_occurance_of_words()
+        self.delete_project_files()
 
 
 

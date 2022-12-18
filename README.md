@@ -39,13 +39,17 @@ options = {"option name" : "option"}
 podcast_analyser = pay.Analyse(options)
 ```
 
-+ ```trancripe``` ```True``` is standard, ```False``` skips the part of transciping e.g. if there are already transcripted files.
++ ```trancripe: bool``` ```True``` is standard, ```False``` skips the part of transciping e.g. if there are already transcripted files.
 
-+ ```transscript_path``` The folder in which the files with the transcribed podcast episodes will be saved. No other files should be in here!
++ ```transscript_path: str``` The folder in which the files with the transcribed podcast episodes will be saved. No other files should be in here!
 
-+ ```audio_path``` folder containing the audio files to be transcribed. No other files should be in here!
++ ```audio_path: str``` folder containing the audio files to be transcribed. No other files should be in here!
 
-+ ```whisper_model``` The model with which whisper should work. More information: [Whisper Github](https://github.com/openai/whisper)
++ ```whisper_model: str``` The model with which whisper should work. More information: [Whisper Github](https://github.com/openai/whisper)
+
++ ```delete_audio_files: bool``` deletes the audio files after they have been transcribed
+
++ ```delete_transscript_files: bool``` deletes the files with the transscripts after they have been processed
 
 ### filter lists:
 You can create your own filter lists which must be placed in the folder ```filterlists```. Make sure that each word is on its own line.
