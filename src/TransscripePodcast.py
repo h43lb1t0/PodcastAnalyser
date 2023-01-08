@@ -1,10 +1,11 @@
 import os
 import time
 from threading import Thread
-from .StopWatch import Stopwatch
-
 
 import whisper
+
+from .utils.getRemainingTime import EssimateRemainingTime
+from .utils.StopWatch import Stopwatch
 
 
 class TransscripePodcast:
@@ -17,7 +18,7 @@ class TransscripePodcast:
         self.audio_path: str = options.get('audio_path')
         self.whisper_model: str = options.get('whisper_model')
         self.all_episodes: list = os.listdir(self.audio_path)
-        print(self.audio_path)
+        
         
         
 
@@ -25,6 +26,9 @@ class TransscripePodcast:
         if (not os.path.exists(self.transscript_path)):
                 os.mkdir(self.transscript_path)
 
+    """ def calculate_estimated_time_remaining(self, durutations: list) -> float:
+         """
+    
     def transscripe(self) -> None: 
         """
             transcribes all episodes of a podcast that are stored in the order defined by 'audio_path'
@@ -37,7 +41,12 @@ class TransscripePodcast:
 
 
         # iterates over ech episode transcripe it and save it in an numeric named file
+        durutations = []
         for i, episode in enumerate(self.all_episodes, start=1):
+
+            if i == int(len(self.all_episodes) * .1):
+                esstimatedTime =  EssimateRemainingTime(durutations, self.all_episodes)
+                esstimatedTime.run()
             
             stopwatch = Stopwatch()
             timer = Thread(target=stopwatch.printTime, args=())
@@ -48,6 +57,7 @@ class TransscripePodcast:
 
             result = model.transcribe(f"{self.audio_path}/{episode}")
             
-            with open(f"{self.transscript_path}/episode{i}.txt", 'w') as f:
+            with open(f"{self.transscript_path}/{episode}.txt", 'w') as f:
                     f.writelines(result["text"].lower())
             stopwatch.stop()
+            durutations.append(stopwatch.getEndTime())

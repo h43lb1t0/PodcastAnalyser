@@ -6,20 +6,24 @@ A tool to analyse which words from filter lists are used in a podcast and how of
  ## How to use it?
  1. install the requirements.txt
  (It is recommended to use a virtual environment)
- ```
-  pip install -r requirements.txt
-````
-or  
-```
+
+```bash
   pip3 install -r requirements.txt
-````
-2. if you don't have ffmpeg installed, install it. Under Ubuntu/Debian:
 ```
+2. if you don't have ffmpeg installed, install it. Under Ubuntu/Debian:
+```bash
 sudo apt update && sudo apt install ffmpeg
 ```
 for other operating systems: [How to install ffmpeg](https://www.hostinger.com/tutorials/how-to-install-ffmpeg)
 
-3. Put the podcast episodes in a folder called "podcast". Alternatively, you can create a folder with your own name. To be able to use it:
+3. You might have to install whisper manually:
+```bash
+pip3 install git+https://github.com/openai/whisper.git 
+```
+4. Install CUDA if your GPU is compatibale. <br/>
+How to install [CUDA](https://developer.nvidia.com/cuda-downloads)
+
+5. Put the podcast episodes in a folder called "podcast". Alternatively, you can create a folder with your own name. To be able to use it:
 
 ```Python
 import src.PodcastAnalyse as pay
@@ -33,7 +37,7 @@ podcast_analyser.analyze()
 ----------------------------------------------------------------
 ## documentation
 ### options:
-Options as dic 
+Options as Dictionary 
 ```Python
 options = {"option name" : "option"}
 podcast_analyser = pay.Analyse(options)
