@@ -7,7 +7,7 @@ from threading import Thread
 import whisper
 
 from .TransscripePodcast import TransscripePodcast as tsp
-from .StopWatch import Stopwatch
+from .utils.StopWatch import Stopwatch
 
 
 class Analyse():
@@ -23,6 +23,7 @@ class Analyse():
         self.audio_path: str = "podcast"
         self.whisper_model: str = "medium"
         self.delete_files: dict = {"audio" : False, "transscripts" : False}
+        self.results_path: str = "results"
 
         #get options from user if set
         self.transscripe = options.get('transscripe', self.transscripe)
@@ -31,7 +32,7 @@ class Analyse():
         self.whisper_model = options.get('whisper_model',self.whisper_model)
         self.delete_files["audio"] = options.get('delete_audio_files',self.delete_files.get("audio"))
         self.delete_files["transscripts"] = options.get('delete_transscript_files',self.delete_files.get("transscripts"))
-
+        self.results_path = options.get('results_path', self.results_path)
 
         self.filterlists: list = os.listdir("filterlists")
 
@@ -68,7 +69,7 @@ class Analyse():
         """
         print("start reading files")
         for episode in os.listdir(self.transscript_path):
-            with open(f"transscripte/{episode}", "r") as f:
+            with open(f"{self.transscript_path}/{episode}", "r") as f:
                 text = f.read()
                 text = text.replace(",", "").replace(".", "").replace("!", "").replace("?", "")
                 word_list_tmp = text.split()
@@ -117,6 +118,10 @@ class Analyse():
             self.unique_words_count.append((wort.strip(), count))
         print("counted all\n\n")
 
+    def save_results(self) -> None:
+        with open(f"{self.results_path}/results.txt", 'w') as results:
+            results.writelines(str(sorted(self.unique_words_count, key = lambda x: x[1])))
+
     def delete_project_files(self) -> None:
         try:
             if self.delete_files["audio"]:
@@ -135,6 +140,7 @@ class Analyse():
         self.filter_for_words()
         self.create_unique_word_list()
         self.count_occurance_of_words()
+        self.save_results()
         self.delete_project_files()
 
 
