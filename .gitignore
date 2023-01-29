@@ -1,4 +1,5 @@
 analyse/*
+winVenv/*
 
 podcast/*
 transscripte/*
@@ -10,4 +11,4 @@ __pycache__/*
 
 notes.txt
 credentials.json
-GoogleNLP.py
+src/utils/GoogleNLP.py
