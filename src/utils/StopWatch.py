@@ -13,7 +13,26 @@ class Stopwatch():
             do the printing
         """
         time.sleep(1)
+
         while self.run:
+            if self.i >= 3600:
+                hours = self.i // 3600
+                minutes = (self.i % 3600) // 60
+                seconds = self.i % 60
+                print(f"duration: {hours} hour(s) {minutes} minute(s) {seconds} seconds", end='', flush=True)
+            elif self.i >= 60:
+                minutes = self.i // 60
+                seconds = self.i % 60
+                print(f"duration: {minutes} minute(s) {seconds} seconds", end='', flush=True)
+            else:
+                print(f"duration: {self.i} seconds", end='', flush=True)
+            
+            time.sleep(1)
+            print('\r    \r', end='', flush=True)
+            self.i += 1
+
+
+        """ while self.run:
             if self.i > 60:
                 print(f"duration: {round(self.i/60, 2)} ", end='min', flush=True)
             else:
@@ -21,7 +40,7 @@ class Stopwatch():
             
             time.sleep(1)
             print('\r    \r', end='', flush=True)
-            self.i += 1
+            self.i += 1 """
 
     def getEndTime(self) -> int:
         """
