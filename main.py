@@ -1,11 +1,14 @@
 import time
 
 import src.PodcastAnalyse as pay
+import src.utils.PrintTime as pt
 
 start = time.time()
+
+
 
 podcast_analyser = pay.Analyse()
 podcast_analyser.analyze()
 
 end = time.time()
-print("The time of execution of above program is :", (end-start) * 10**3, "ms")
+pt.PrintTime(end - start, False).printTime()
